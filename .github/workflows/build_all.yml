@@ -255,93 +255,55 @@ jobs:
               name: sdrpp_debian_${{ matrix.os.release }}_${{ matrix.target.arch }}
               path: chroot/src/sdrpp_debian_amd64.deb
 
-    build_ubuntu_focal:
-        runs-on: ubuntu-latest
-
-        steps:
+    build_ubuntu:
+      strategy:
+        matrix:
+          os: 
+            - release: focal
+              extras: cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
+              dependencies: libfftw3-dev, libglfw3-dev, libvolk2-dev, librtaudio-dev, libzstd-dev
+            - release: jammy
+              extras: cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
+              dependencies: libfftw3-dev, libglfw3-dev, libvolk2-dev, librtaudio-dev, libzstd-dev
+            - release: noble
+              extras: cmake git libfftw3-dev libglfw3-dev libvolk-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
+              dependencies: libfftw3-dev, libglfw3-dev, libvolk-dev, librtaudio-dev, libzstd-dev
+            - release: oracular
+              extras: cmake git libfftw3-dev libglfw3-dev libvolk-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
+              dependencies: libfftw3-dev, libglfw3-dev, libvolk-dev, librtaudio-dev, libzstd-dev
+          target:
+            - arch: armhf
+              mirror: http://ports.ubuntu.com/ubuntu-ports/
+            - arch: arm64
+              mirror: http://ports.ubuntu.com/ubuntu-ports/
+            - arch: amd64
+              mirror: http://azure.archive.ubuntu.com/ubuntu/
+      name: build_ubuntu_${{ matrix.os.release }}_${{ matrix.target.arch }}
+      runs-on: ubuntu-latest
+      steps:
+        - name: Install chroot utilities
+          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
+        - name: Create build chroot
+          run: sudo mmdebstrap --keyring=/etc/apt/keyrings --keyring=/usr/share/keyrings --keyring=/etc/apt/trusted.gpg.d --mode sudo --variant=buildd --architectures=${{ matrix.target.arch }} ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_focal && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
+          with:
+            path: src
+        - name: Move sources into chroot
+          run: sudo mv src chroot/src
+        - name: Install dependencies in chroot
+          run: |
+            sudo chroot ./chroot apt-get update
+            sudo chroot ./chroot apt-get install -y ${{ matrix.os.extras }}
+            sudo chroot ./chroot bash /src/.github/workflows/libraries_extra.sh
+        - name: Build
+          run: sudo chroot chroot bash -c "mkdir /src/build; cd /src/build; cmake /src -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON; make -j4"
+        - name: Package
+          run: sudo chroot chroot bash -c "cd /src; bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
           uses: actions/upload-artifact@v4
           with:
-              name: sdrpp_ubuntu_focal_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_ubuntu_jammy:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_jammy && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_ubuntu_jammy_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_ubuntu_noble:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_noble && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_ubuntu_noble_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_ubuntu_oracular:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/ubuntu_oracular && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_ubuntu_oracular_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
+              name: sdrpp_ubuntu_${{ matrix.os.release }}_${{ matrix.target.arch }}
+              path: chroot/src/sdrpp_debian_amd64.deb
 
     build_raspios_bullseye_armhf:
         runs-on: ARM
@@ -398,7 +360,7 @@ jobs:
               path: ${{runner.workspace}}/sdrpp.apk
 
     create_full_archive:
-        needs: ['build_windows', 'build_macos_intel', 'build_macos_arm', 'build_debian', 'build_ubuntu_focal', 'build_ubuntu_jammy', 'build_ubuntu_noble', 'build_ubuntu_oracular', 'build_raspios_bullseye_armhf', 'build_android']
+        needs: ['build_windows', 'build_macos_intel', 'build_macos_arm', 'build_debian', 'build_ubuntu', 'build_raspios_bullseye_armhf', 'build_android']
         runs-on: ubuntu-latest
 
         steps:
@@ -417,9 +379,17 @@ jobs:
             mv sdrpp_debian_sid_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_armhf.deb && 
             mv sdrpp_debian_sid_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_arm64.deb && 
             mv sdrpp_debian_sid_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_amd64.deb && 
+            mv sdrpp_ubuntu_focal_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_focal_armhf.deb &&
+            mv sdrpp_ubuntu_focal_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_focal_arm64.deb &&
             mv sdrpp_ubuntu_focal_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_focal_amd64.deb &&
+            mv sdrpp_ubuntu_jammy_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_jammy_armhf.deb &&
+            mv sdrpp_ubuntu_jammy_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_jammy_arm64.deb &&
             mv sdrpp_ubuntu_jammy_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_jammy_amd64.deb &&
+            mv sdrpp_ubuntu_noble_amd64/sdrpp_debian_armhf.deb sdrpp_all/sdrpp_ubuntu_noble_armhf.deb &&
+            mv sdrpp_ubuntu_noble_amd64/sdrpp_debian_arm64.deb sdrpp_all/sdrpp_ubuntu_noble_arm64.deb &&
             mv sdrpp_ubuntu_noble_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_noble_amd64.deb &&
+            mv sdrpp_ubuntu_oracular_amd64/sdrpp_debian_armhf.deb sdrpp_all/sdrpp_ubuntu_oracular_armhf.deb &&
+            mv sdrpp_ubuntu_oracular_amd64/sdrpp_debian_arm64.deb sdrpp_all/sdrpp_ubuntu_oracular_arm64.deb &&
             mv sdrpp_ubuntu_oracular_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_ubuntu_oracular_amd64.deb &&
             mv sdrpp_raspios_bullseye_armhf/sdrpp_debian_armhf.deb sdrpp_all/sdrpp_raspios_bullseye_armhf.deb &&
             mv sdrpp_android/sdrpp.apk sdrpp_all/sdrpp.apk
