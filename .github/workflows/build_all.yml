@@ -288,7 +288,7 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo mmdebstrap --keyring=/etc/apt/keyrings --keyring=/usr/share/keyrings --keyring=/etc/apt/trusted.gpg.d --mode sudo --variant=buildd --architectures=${{ matrix.target.arch }} --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          run: sudo mmdebstrap --keyring=/etc/apt/keyrings --keyring=/usr/share/keyrings --keyring=/etc/apt/trusted.gpg.d --mode sudo --variant=apt --architectures=${{ matrix.target.arch }} --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
           with:
             path: src
