@@ -247,12 +247,12 @@ jobs:
         - name: Build
           run: sudo chroot chroot bash -c "mkdir /src/build; cd /src/build; cmake /src; make -j4"
         - name: Package
-          run: sudo chroot chroot bash -c "bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
+          run: sudo chroot chroot bash -c "cd /src; bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
           uses: actions/upload-artifact@v4
           with:
               name: sdrpp_debian_${{ matrix.os.release }}_${{ matrix.target.arch }}
-              path: ${{runner.workspace}}/chroot/src/sdrpp_debian_amd64.deb
+              path: chroot/src/sdrpp_debian_amd64.deb
 
     build_ubuntu_focal:
         runs-on: ubuntu-latest
