@@ -295,16 +295,22 @@ jobs:
         - name: Move sources into chroot
           run: sudo mv src chroot/src
         - name: Install dependencies in chroot
+          shell: sudo chroot ./chroot {0}
           run: |
-            sudo chroot ./chroot apt-get update
-            sudo chroot ./chroot apt-get install -y ${{ matrix.os.extras }}
-            sudo chroot ./chroot bash /src/.github/workflows/scripts/libraries_extra.sh
+            apt-get update
+            apt-get install -y ${{ matrix.os.extras }}
+            bash /src/.github/workflows/scripts/libraries_extra.sh
         - name: Build
+          shell: sudo chroot ./chroot {0}
           run: |
-            sudo chroot chroot bash /src/.github/workflows/scripts/cmake.sh /src /src/build
-            sudo chroot chroot bash -c "cd /src/build; make -j4"
+            bash /src/.github/workflows/scripts/cmake.sh /src /src/build
+            cd /src/build
+            make -j4
         - name: Package
-          run: sudo chroot chroot bash -c "cd /src; bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
+          shell: sudo chroot ./chroot {0}
+          run: |
+            cd /src
+            bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'
         - name: Save Deb Archive
           uses: actions/upload-artifact@v4
           with:
