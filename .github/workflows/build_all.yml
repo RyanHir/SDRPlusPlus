@@ -225,7 +225,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Install chroot utilities
-          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support
+          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-keyring
         - name: Create build chroot
           run: mmdebstrap --mode fakechroot --variant=buildd --architectures=${{ matrix.target.arch }} ${{ matrix.os }} chroot ${{ matrix.target.mirror }}
         - name: Install dependencies in chroot
