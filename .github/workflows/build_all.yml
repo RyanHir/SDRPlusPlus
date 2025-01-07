@@ -245,7 +245,7 @@ jobs:
         - name: Move sources into chroot
           run: sudo mv src chroot/src
         - name: Build
-          run: sudo chroot chroot bash -c "mkdir /src/build; cmake /src; make"
+          run: sudo chroot chroot bash -c "mkdir /src/build; cd /src/build; cmake /src; make -j4"
         - name: Package
           run: sudo chroot chroot bash -c "bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
