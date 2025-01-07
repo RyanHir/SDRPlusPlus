@@ -3,7 +3,7 @@ set -e
 cd /root
 
 # Install SDRPlay libraries
-wget https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
+wget --no-check-certificate https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
 7z x ./SDRplay_RSP_API-Linux-3.15.1.run
 7z x ./SDRplay_RSP_API-Linux-3.15.1
 cp x86_64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
