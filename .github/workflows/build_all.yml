@@ -244,9 +244,11 @@ jobs:
           run: |
             sudo chroot ./chroot apt-get update
             sudo chroot ./chroot apt-get install -y ${{ matrix.os.extras }}
-            sudo chroot ./chroot bash /src/.github/workflows/libraries_extra.sh
+            sudo chroot ./chroot bash /src/.github/workflows/scripts/libraries_extra.sh
         - name: Build
-          run: sudo chroot chroot bash -c "mkdir /src/build; cd /src/build; cmake /src -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON; make -j4"
+          run: |
+            sudo chroot chroot bash /src/.github/workflows/scripts/cmake.sh /src /src/build
+            sudo chroot chroot bash -c "cd /src/build; make -j4"
         - name: Package
           run: sudo chroot chroot bash -c "cd /src; bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
@@ -286,15 +288,7 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y debootstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          if: ${{ matrix.target.arch == 'amd64' }}
-          run: sudo debootstrap --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
-        - name: Create build chroot
-          if: ${{ matrix.target.arch != 'amd64' }}
-          run: |
-            sudo debootstrap --foreign --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
-            # sudo cp /usr/bin/qemu-arm-static chroot/usr/bin
-            # sudo cp /usr/bin/qemu-aarch64-static chroot/usr/bin
-            sudo chroot chroot /debootstrap/debootstrap --second-stage
+          run: sudo debootstrap --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
           with:
             path: src
@@ -304,9 +298,11 @@ jobs:
           run: |
             sudo chroot ./chroot apt-get update
             sudo chroot ./chroot apt-get install -y ${{ matrix.os.extras }}
-            sudo chroot ./chroot bash /src/.github/workflows/libraries_extra.sh
+            sudo chroot ./chroot bash /src/.github/workflows/scripts/libraries_extra.sh
         - name: Build
-          run: sudo chroot chroot bash -c "mkdir /src/build; cd /src/build; cmake /src -DOPT_BUILD_BLADERF_SOURCE=ON -DOPT_BUILD_LIMESDR_SOURCE=ON -DOPT_BUILD_SDRPLAY_SOURCE=ON -DOPT_BUILD_NEW_PORTAUDIO_SINK=ON -DOPT_BUILD_M17_DECODER=ON -DOPT_BUILD_PERSEUS_SOURCE=ON -DOPT_BUILD_RFNM_SOURCE=ON -DOPT_BUILD_FOBOSSDR_SOURCE=ON; make -j4"
+          run: |
+            sudo chroot chroot bash /src/.github/workflows/scripts/cmake.sh /src /src/build
+            sudo chroot chroot bash -c "cd /src/build; make -j4"
         - name: Package
           run: sudo chroot chroot bash -c "cd /src; bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
