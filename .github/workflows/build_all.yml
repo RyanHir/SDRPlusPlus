@@ -285,8 +285,10 @@ jobs:
       name: build_ubuntu_${{ matrix.os.release }}_${{ matrix.target.arch }}
       runs-on: ubuntu-24.04
       steps:
+        - run: |
+            docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         - name: Install chroot utilities
-          run: sudo apt-get install -y debootstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
+          run: sudo apt-get install -y debootstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
           if: ${{ matrix.target.arch == 'amd64' }}
           run: sudo debootstrap --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
@@ -294,8 +296,8 @@ jobs:
           if: ${{ matrix.target.arch != 'amd64' }}
           run: |
             sudo debootstrap --foreign --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
-            sudo cp /usr/bin/qemu-arm-static chroot/usr/bin
-            sudo cp /usr/bin/qemu-aarch64-static chroot/usr/bin
+            # sudo cp /usr/bin/qemu-arm-static chroot/usr/bin
+            # sudo cp /usr/bin/qemu-aarch64-static chroot/usr/bin
             sudo chroot chroot /debootstrap/debootstrap --second-stage
         - uses: actions/checkout@v4
           with:
