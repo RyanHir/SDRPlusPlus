@@ -243,7 +243,9 @@ jobs:
             sudo chroot ./chroot apt-get install -y ${{ matrix.os.extras }}
         - uses: actions/checkout@v4
           with:
-            path: chroot/src
+            path: src
+        - name: Move sources into chroot
+          run: sudo mv src chroot/src
         - name: Build
           run: sudo chroot bash -c "mkdir /src/build; cmake /src; make"
         - name: Package
