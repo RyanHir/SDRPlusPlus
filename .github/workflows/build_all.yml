@@ -288,7 +288,15 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y debootstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo debootstrap --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          if: ${{ matrix.target.arch == 'amd64' }}
+          run: sudo debootstrap --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+        - name: Create build chroot
+          if: ${{ matrix.target.arch != 'amd64' }}
+          run: |
+            sudo debootstrap --foreign --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+            sudo cp /usr/bin/qemu-arm-static chroot/usr/bin
+            sudo cp /usr/bin/qemu-aarch64-static chroot/usr/bin
+            sudo chroot chroot /debootstrap/debootstrap --second-stage
         - uses: actions/checkout@v4
           with:
             path: src
