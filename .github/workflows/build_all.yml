@@ -247,9 +247,9 @@ jobs:
         - name: Move sources into chroot
           run: sudo mv src chroot/src
         - name: Build
-          run: sudo chroot bash -c "mkdir /src/build; cmake /src; make"
+          run: sudo chroot chroot bash -c "mkdir /src/build; cmake /src; make"
         - name: Package
-          run: sudo chroot bash -c "bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
+          run: sudo chroot chroot bash -c "bash /src/make_debian_package.sh /src/build '${{ matrix.os.dependencies }}'"
         - name: Save Deb Archive
           uses: actions/upload-artifact@v4
           with:
