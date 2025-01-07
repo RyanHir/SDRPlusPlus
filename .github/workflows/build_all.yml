@@ -286,7 +286,7 @@ jobs:
       runs-on: ubuntu-24.04
       steps:
         - name: Install chroot utilities
-          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
+          run: sudo apt-get install -y debootstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
           run: sudo debootstrap --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
