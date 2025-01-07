@@ -217,7 +217,7 @@ jobs:
           os: [bullseye, bookworm, sid]
           target:
             - arch: armhf
-              mirror: http://archive.raspbian.org/raspbian/
+              mirror: http://ftp.debian.org/debian/
             - arch: arm64
               mirror: http://ftp.debian.org/debian/
             - arch: amd64
@@ -225,7 +225,7 @@ jobs:
       runs-on: ubuntu-latest
       steps:
         - name: Install chroot utilities
-          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-keyring
+          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
           run: mmdebstrap --keyring=/etc/apt/keyrings --keyring=/usr/share/keyrings --keyring=/etc/apt/trusted.gpg.d --mode fakechroot --variant=buildd --architectures=${{ matrix.target.arch }} ${{ matrix.os }} chroot ${{ matrix.target.mirror }}
         - name: Install dependencies in chroot
