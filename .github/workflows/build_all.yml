@@ -283,7 +283,7 @@ jobs:
             - arch: amd64
               mirror: http://azure.archive.ubuntu.com/ubuntu/
       name: build_ubuntu_${{ matrix.os.release }}_${{ matrix.target.arch }}
-      runs-on: ubuntu-latest
+      runs-on: ubuntu-24.04
       steps:
         - name: Install chroot utilities
           run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support debian-archive-keyring debian-ports-archive-keyring debian-keyring
