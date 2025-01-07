@@ -11,7 +11,7 @@ wget --no-check-certificate https://www.sdrplay.com/software/SDRplay_RSP_API-Lin
 if [ "$ARCH" = x86_64 ]; then
     cp x86_64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
     cp inc/* /usr/include/
-else if [ "$ARCH" = aarch64 ]; then
+elif [ "$ARCH" = aarch64 ]; then
     cp aarch64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
     cp inc/* /usr/include/
 fi
