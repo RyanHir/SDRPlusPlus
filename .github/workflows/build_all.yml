@@ -227,7 +227,7 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support
         - name: Create build chroot
-          run: mmdebstrap --mode fakechroot --variant=buildd main chroot ${{ matrix.os }}
+          run: mmdebstrap --mode fakechroot --variant=buildd --architectures=${{ matrix.target.arch }} ${{ matrix.os }} chroot ${{ matrix.target.mirror }}
         - name: Install dependencies in chroot
           run: fakechroot chroot ./chroot apt-get install -y libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
         - uses: actions/checkout@v4
