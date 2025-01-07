@@ -219,9 +219,9 @@ jobs:
             - arch: armhf
               mirror: http://archive.raspbian.org/raspbian/
             - arch: arm64
-              mirror: http://archive.debian.org/debian/
+              mirror: http://ftp.debian.org/debian/
             - arch: amd64
-              mirror: http://archive.debian.org/debian/
+              mirror: http://ftp.debian.org/debian/
       runs-on: ubuntu-latest
       steps:
         - name: Install chroot utilities
