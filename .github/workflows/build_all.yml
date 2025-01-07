@@ -231,6 +231,7 @@ jobs:
               mirror: http://ftp.debian.org/debian/
             - arch: amd64
               mirror: http://ftp.debian.org/debian/
+      name: build_debian_${{ matrix.os.release }}_${{ matrix.target.arch }}
       runs-on: ubuntu-latest
       steps:
         - name: Install chroot utilities
