@@ -211,93 +211,37 @@ jobs:
               name: sdrpp_macos_arm
               path: ${{runner.workspace}}/sdrpp_macos_arm.zip
 
-    build_debian_buster:
-        runs-on: ubuntu-latest
-
-        steps:
+    build_linux:
+      strategy:
+        matrix:
+          os: [bullseye, bookworm, sid]
+          target:
+            - arch: armhf
+              mirror: http://archive.raspbian.org/raspbian/
+            - arch: arm64
+              mirror: http://archive.debian.org/debian/
+            - arch: amd64
+              mirror: http://archive.debian.org/debian/
+      runs-on: ubuntu-latest
+      steps:
+        - name: Install chroot utilities
+          run: sudo apt-get install -y mmdebstrap fakechroot qemu-user-static binfmt-support
+        - name: Create build chroot
+          run: mmdebstrap --mode fakechroot --variant=buildd main chroot ${{ matrix.os }}
+        - name: Install dependencies in chroot
+          run: fakechroot chroot ./chroot apt-get install -y libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
         - uses: actions/checkout@v4
-
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/debian_buster && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
+          with:
+            path: chroot/src
+        - name: Build
+          run: fakechroot chroot bash -c "mkdir /src/build; cmake /src; make"
+        - name: Package
+          run: fakechroot chroot bash -c "bash /src/make_debian_package.sh /src/build 'libfftw3-dev, libglfw3-dev, libvolk2-dev, librtaudio-dev, libzstd-dev'"
         - name: Save Deb Archive
           uses: actions/upload-artifact@v4
           with:
               name: sdrpp_debian_buster_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_debian_bullseye:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/debian_bullseye && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_debian_bullseye_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_debian_bookworm:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/debian_bookworm && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_debian_bookworm_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
-
-    build_debian_sid:
-        runs-on: ubuntu-latest
-
-        steps:
-        - uses: actions/checkout@v4
-        
-        - name: Create Docker Image
-          run: cd $GITHUB_WORKSPACE/docker_builds/debian_sid && docker build . --tag sdrpp_build
-
-        - name: Run Container
-          run: docker run --name build -v $GITHUB_WORKSPACE:/root/SDRPlusPlus --env BUILD_NO="-$GITHUB_RUN_NUMBER" sdrpp_build /root/do_build.sh
-
-        - name: Recover Deb Archive
-          working-directory: ${{runner.workspace}}
-          run: docker cp build:/root/SDRPlusPlus/sdrpp_debian_amd64.deb ./
-
-        - name: Save Deb Archive
-          uses: actions/upload-artifact@v4
-          with:
-              name: sdrpp_debian_sid_amd64
-              path: ${{runner.workspace}}/sdrpp_debian_amd64.deb
+              path: ${{runner.workspace}}/chroot/sdrpp_debian_amd64.deb
 
     build_ubuntu_focal:
         runs-on: ubuntu-latest
