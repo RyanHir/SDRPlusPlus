@@ -2,8 +2,6 @@
 set -e
 cd /root
 
-ARCH="$(uname -m)"
-
 # Install dependencies and tools
 apt update
 apt install -y build-essential cmake git libfftw3-dev libglfw3-dev libvolk-dev libzstd-dev libairspyhf-dev libairspy-dev \
@@ -14,13 +12,8 @@ apt install -y build-essential cmake git libfftw3-dev libglfw3-dev libvolk-dev l
 wget https://www.sdrplay.com/software/SDRplay_RSP_API-Linux-3.15.1.run
 7z x ./SDRplay_RSP_API-Linux-3.15.1.run
 7z x ./SDRplay_RSP_API-Linux-3.15.1
-if [ "$ARCH" = x86_64 ]; then
-    cp x86_64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
-    cp inc/* /usr/include/
-else if [ "$ARCH" = aarch64 ]; then
-    cp aarch64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
-    cp inc/* /usr/include/
-fi
+cp x86_64/libsdrplay_api.so.3.15 /usr/lib/libsdrplay_api.so
+cp inc/* /usr/include/
 
 # Install libperseus
 git clone https://github.com/Microtelecom/libperseus-sdr
