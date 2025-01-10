@@ -241,7 +241,7 @@ jobs:
         - name: Create build chroot
           run: |
             sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
-            sudo cp /etc/resolv.conf chroot/etc/resolv.conf
+            sudo cp --remove-destination /etc/resolv.conf chroot/etc/resolv.conf
         - uses: actions/checkout@v4
           with:
             path: src
@@ -295,7 +295,7 @@ jobs:
         - name: Create build chroot
           run: |
             sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
-            sudo cp /etc/resolv.conf chroot/etc/resolv.conf
+            sudo cp --remove-destination /etc/resolv.conf chroot/etc/resolv.conf
         - uses: actions/checkout@v4
           with:
             path: src
