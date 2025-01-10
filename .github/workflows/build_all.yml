@@ -236,7 +236,9 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y mmdebstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          run: |
+            sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+            sudo cp /etc/resolv.conf chroot/etc/resolv.conf
         - uses: actions/checkout@v4
           with:
             path: src
@@ -288,7 +290,9 @@ jobs:
         - name: Install chroot utilities
           run: sudo apt-get install -y mmdebstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          run: |
+            sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" --include="${{ matrix.os.extras }}" --aptopt='Apt::Install-Recommends "true"' ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+            sudo cp /etc/resolv.conf chroot/etc/resolv.conf
         - uses: actions/checkout@v4
           with:
             path: src
