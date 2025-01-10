@@ -234,9 +234,9 @@ jobs:
         - run: |
             docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         - name: Install chroot utilities
-          run: sudo apt-get install -y debootstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
+          run: sudo apt-get install -y mmdebstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo debootstrap --arch=${{ matrix.target.arch }} --variant=buildd --include="${{ matrix.os.extras }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          run: sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --include="${{ matrix.os.extras }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
           with:
             path: src
@@ -286,9 +286,9 @@ jobs:
         - run: |
             docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
         - name: Install chroot utilities
-          run: sudo apt-get install -y debootstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
+          run: sudo apt-get install -y mmdebstrap fakechroot debian-archive-keyring debian-ports-archive-keyring debian-keyring
         - name: Create build chroot
-          run: sudo debootstrap --arch=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" --include="${{ matrix.os.extras }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
+          run: sudo mmdebstrap --architectures=${{ matrix.target.arch }} --variant=buildd --components="${{ matrix.os.components }}" --include="${{ matrix.os.extras }}" ${{ matrix.os.release }} chroot ${{ matrix.target.mirror }}
         - uses: actions/checkout@v4
           with:
             path: src
