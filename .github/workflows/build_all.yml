@@ -215,6 +215,9 @@ jobs:
       strategy:
         matrix:
           os: 
+            - release: bullseye
+              extras: cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
+              dependencies: libfftw3-dev, libglfw3-dev, libvolk2-dev, librtaudio-dev, libzstd-dev
             - release: bookworm
               extras: cmake git libfftw3-dev libglfw3-dev libvolk2-dev libzstd-dev libairspyhf-dev libairspy-dev libiio-dev libad9361-dev librtaudio-dev libhackrf-dev librtlsdr-dev libbladerf-dev liblimesuite-dev p7zip-full wget portaudio19-dev libcodec2-dev autoconf libtool xxd libspdlog-dev
               dependencies: libfftw3-dev, libglfw3-dev, libvolk2-dev, librtaudio-dev, libzstd-dev
@@ -357,6 +360,9 @@ jobs:
             mv sdrpp_debian_bullseye_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bullseye_armhf.deb && 
             mv sdrpp_debian_bullseye_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bullseye_arm64.deb && 
             mv sdrpp_debian_bullseye_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bullseye_amd64.deb && 
+            mv sdrpp_debian_bookworm_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bookworm_armhf.deb && 
+            mv sdrpp_debian_bookworm_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bookworm_arm64.deb && 
+            mv sdrpp_debian_bookworm_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_bookworm_amd64.deb && 
             mv sdrpp_debian_sid_armhf/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_armhf.deb && 
             mv sdrpp_debian_sid_arm64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_arm64.deb && 
             mv sdrpp_debian_sid_amd64/sdrpp_debian_amd64.deb sdrpp_all/sdrpp_debian_sid_amd64.deb && 
